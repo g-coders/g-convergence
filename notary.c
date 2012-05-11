@@ -74,12 +74,12 @@ set_notary_option (char *option, char* argument)
 
 /* Set the keyfile and certfile */
 static void
-set_key_and_cert_files() 
+set_key_and_cert() 
 {
   char mykey[128];
   char mycert[128];
   FILE *fp = fopen("./notary.config","r");
-
+  
   fgets(mykey, 129, fp);
   mykey[strlen(mykey)-2] = '\0';
   keyfile = mykey;
@@ -87,6 +87,8 @@ set_key_and_cert_files()
   fgets(mycert, 129, fp);
   mycert[strlen(mycert)-2] = '\0';
   certfile = mycert;
+
+  fclose(fp);
 }
 
 int main (int argc, char *argv[])
