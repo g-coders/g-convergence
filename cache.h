@@ -35,11 +35,6 @@ MYSQL* start_mysql_connection();
  */ 
 void close_mysql_connection(MYSQL *connection);
 
-/* Determines whether given fingerprint can be safely inserted.
- * Returns 1 if it is safe. Otherwise returns 0.
- */
-int is_fingerprint_safe(char *fingerprint);
-
 /* Determines whether given url can be safely inserted.
  * Returns 1 if it is safe. Otherwise returns 0.
  */ 

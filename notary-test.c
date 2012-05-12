@@ -1141,7 +1141,7 @@ test_request_certificate ()
 void
 test_verify_fingerprint_format ()
 {
-  int i, fpt_length = 59;
+  int i;
   char temp, temp1;
   
   typedef struct char_at_pos
@@ -1153,11 +1153,13 @@ test_verify_fingerprint_format ()
   } char_at_pos;
 
   /* Initialize the fingerprint. */
-  char *invalid_fpt = malloc (sizeof (char) * (fpt_length + 1) );
+  char *invalid_fpt = malloc(sizeof(char) * FPT_LENGTH);
   strcpy (invalid_fpt, "b6:a4:6d:54:bc:9a:04:fe:2a:ff:8b:b7:5a:3a:a9:b1:0f:66:73:a8");
 
-  char *valid_fpt = malloc(sizeof(char) * (fpt_length + 1));
-  strcpy (valid_fpt, "51:1f:8e:c6:22:82:5b:ed:a2:75:cb:3e:95:ab:63:7f:69:d3:18:1c");
+  char *valid_fpt = malloc(sizeof(char) * FPT_LENGTH);
+  strncpy (valid_fpt,
+          "51:1f:8e:c6:22:82:5b:ed:a2:75:cb:3e:95:ab:63:7f:69:d3:18:1c",
+  sizeof(char) * FPT_LENGTH);
 
   test (verify_fingerprint_format (valid_fpt) == 1);
   
@@ -1491,12 +1493,9 @@ main (int argc, char *argv[])
 {
   mem_leak_check();
   /* Variables to keep track of allocated memory. */
-  //int before, after;
 
-  mtrace();
-  before = mem_allocated();
   /* Test all functions here. */
-  test_convergence ();
+  //test_convergence ();
   //test_answer_to_connection();
 
   /* Check if the system is leaking memory. */
@@ -1510,16 +1509,13 @@ main (int argc, char *argv[])
   //test_send_response ();
   //test_request_certificate ();
   //test_verify_fingerprint_format();
-  //test_is_in_cache ();
+  test_is_in_cache ();
   //test_cache_remove ();
   //test_cache_insert ();
   //test_cache_update ();
   //test_verify_certificate();
 
   //test_curl();
-  after = mem_allocated();
-
-  printf("BEFORE: %d  AFTER: %d\n", before, after);
   //test_cache_update_url ();
   // test_verify_certificate();
 
