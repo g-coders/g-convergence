@@ -8,9 +8,8 @@ Next steps:
 
 notary.c:
 
-* walk through cache functions, fix regex, implement Stone's comments in
-  cache.c
-* is_url_safe()
+* walk through cache functions (still need to fix cache_update_url)
+* implement is_url_safe()
 * test cache functions
 * Integrate cache functions into the system.
 * Test the case when the notary is running on a different machine

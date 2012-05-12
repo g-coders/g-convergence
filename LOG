@@ -103,3 +103,6 @@ NOT NULL, timestamp TIMESTAMP, PRIMARY KEY (url));
 
 mysql> create table blacklisted (url VARCHAR(255) NOT NULL, timestamp
 TIMESTAMP, PRIMARY KEY (url));
+
+May 11
+I could not get regex to work, so I decided to stick to the original version.
