@@ -71,6 +71,6 @@ int cache_remove (char* fingerprint, int db);
 /* Removes cache entries that have expired from trusted cache.
  * @returns 1  if update is successful, otherwise 0
  */
-int cache_update_url (char *url, char *fingerprints);
+int cache_update_url (char *url, char **fingerprints, int num_of_certs);
 
 #endif // CACHE_H

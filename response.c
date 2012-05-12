@@ -12,6 +12,7 @@
 
 #include "response.h"
 #include "certificate.h"
+#include "cache.h"
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
 #include <openssl/pem.h>
@@ -81,6 +82,7 @@ retrieve_response (void *coninfo_cls, host *host_to_verify, const char *fingerpr
   int verified, num_of_certs; // was certificate verified?
   char *fingerprints_from_website[MAX_NO_OF_CERTS];
   char *json_fingerprint_list; // the response to send to client
+  char *fingerprint_to_send; // which fingerprint will we send to the user?
   unsigned int *signature_size = NULL;
   unsigned char *signature;
   RSA *private_key;
@@ -90,38 +92,67 @@ retrieve_response (void *coninfo_cls, host *host_to_verify, const char *fingerpr
 
   //variables to store the time stamp
   size_t start_time, end_time;
-
-  //create space for the fingerprints
-  int i;
-  for(i=0; i<MAX_NO_OF_CERTS; i++)
-    fingerprints_from_website[i] = calloc(FPT_LENGTH, sizeof(char));
-
-  //get the fingerprints
   start_time = time(NULL);
-  num_of_certs = request_certificate(host_to_verify, fingerprints_from_website);
-
-  if (num_of_certs == 0)
+  // Check if the url is in the cache
+  int cache_val;
+  if(cache_val = is_in_cache(host_to_verify->url, fingerprint_from_client))
     {
-      /* The notary could not obtain the certificate from the website
-       * for some reason.
-       */
-      con_info->answer_code = MHD_HTTP_SERVICE_UNAVAILABLE; //503
-      return MHD_NO;
-    } // if
-
-  if (fingerprint_from_client != NULL)
-    {
-      verified =
-        verify_certificate (fingerprint_from_client, fingerprints_from_website, num_of_certs);
-
-      if (verified == 1)
-        con_info->answer_code = MHD_HTTP_OK; // 200
-      else
+      if(cache_val == CACHE_BLACKLIST)
         {
-          con_info->answer_code = MHD_HTTP_CONFLICT; // 409
+          con_info->answer_code = MHD_HTTP_CONFLICT;
         }
+      else // We have a trusted website
+        {
+          con_info->answer_code = MHD_HTTP_OK;
+        }
+      fingerprint_to_send = fingerprint_from_client;
     }
-  else con_info->answer_code = MHD_HTTP_OK;
+  else {  
+    //create space for the fingerprints
+    int i;
+    for(i=0; i<MAX_NO_OF_CERTS; i++)
+      fingerprints_from_website[i] = calloc(FPT_LENGTH, sizeof(char));
+
+    //get the fingerprints
+    num_of_certs =
+      request_certificate(host_to_verify, fingerprints_from_website);
+
+    if (num_of_certs == 0)
+      {
+        /* The notary could not obtain the certificate from the website
+         * for some reason.
+         */
+        con_info->answer_code = MHD_HTTP_SERVICE_UNAVAILABLE; //503
+        return MHD_NO;
+      } // if
+
+    if (fingerprint_from_client != NULL)
+      {
+        verified = verify_certificate
+          (fingerprint_from_client, fingerprints_from_website, num_of_certs);
+
+        if (verified == 1)
+          con_info->answer_code = MHD_HTTP_OK; // 200
+        else
+          {
+            con_info->answer_code = MHD_HTTP_CONFLICT; // 409
+          }
+      }
+    else con_info->answer_code = MHD_HTTP_OK;
+
+    fingerprint_to_send = fingerprints_from_website[0];
+
+    // Update cache
+    int cache_return = cache_update_url(host_to_verify->url,
+                                        fingerprints_from_website,
+                                        num_of_certs);
+    if(!cache_return)
+      fprintf(stderr, "Cache didn't update properly.\n");
+
+    // free memory used for fingerprints
+    for(i=0; i<MAX_NO_OF_CERTS; i++)
+    free(fingerprints_from_website[i]);
+  }
 
   /* Format the response which will be sent to client.
    * Note that this response is sent both on a successful verification
@@ -142,7 +173,7 @@ retrieve_response (void *coninfo_cls, host *host_to_verify, const char *fingerpr
 \t \"fingerprint\": \"%s\"\n \
 \t }\n \
 \t]\n\
-}\n", start_time, end_time, fingerprints_from_website[0]);
+}\n", start_time, end_time, fingerprint_to_send);
 
    /* Get the RSA private key from a file. */
   //private_key = PEM_read_RSAPrivateKey(key_file, NULL, NULL, NULL);
@@ -156,10 +187,6 @@ retrieve_response (void *coninfo_cls, host *host_to_verify, const char *fingerpr
   set_answer_string(con_info, json_fingerprint_list);
   
   free(json_fingerprint_list);
-
-  //free memory used for fingerprints
-  for(i=0; i<MAX_NO_OF_CERTS; i++)
-    free(fingerprints_from_website[i]);
 
   return MHD_YES;
 }

@@ -154,7 +154,7 @@ is_blacklisted (char *url)
 } //is_blacklisted
 
 /* Inserts a certificate fingerprint into the cache.
- * Inserts into trusted cache is db is set to true;
+ * Inserts into trusted cache is db is set to CACHE_TRUSTED;
  * otherwise, inserts into blacklist cache.
  * Returns 1 if insert is successful. Otherwise, returns 0.
  */ 
@@ -227,16 +227,29 @@ int cache_remove (char* fingerprint, int db)
 /* Removes cache entries that have expired from trusted cache. 
  * @return 1 on success, 0 on failure
  */
-int cache_update_url (char *url, char *fingerprints)
+int cache_update_url (char *url, char **fingerprints, int num_of_certs)
 {
   MYSQL *conn = start_mysql_connection();
-  int return_value1, return_value2;
+  char *delete_request;
+  int return_value1;
+  int return_value2 = 0;
+  int temp_value2; // Flag to tell whether any of the cache inserts failed
+  int i; // iteration variable
   
+  asprintf(&delete_request, "DELETE FROM trusted WHERE url = %s", url);
+
   return_value1 =
-    mysql_query(conn, "DELETE FROM trusted(fingerprint)");
-  return_value2 = mysql_query(conn, "SELECT * FROM trusted WHERE timestamp < ");
+    mysql_query(conn, delete_request);
+
+  for(i=0; i<num_of_certs; i++)
+    {
+      temp_value2 = cache_insert(url, fingerprints[i], CACHE_TRUSTED);
+      if(!temp_value2) // If the operation failed
+        return_value2 = 1; // Set return_value2 to failure
+    }
 
   close_mysql_connection(conn);
+  free(delete_request);
 
   return !(return_value1 || return_value2);
 } //cache_update
