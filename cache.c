@@ -48,14 +48,14 @@ start_mysql_connection()
   //If the connection wasn't made correctly, return an error
   if (!conn) 
     {
-      printf("Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+      fprintf(stderr, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
       return NULL;
     }
  
-  if (mysql_real_connect(conn, "localhost", "zetcode", "passwd", 
+  if (mysql_real_connect(conn, "localhost", "dluhosma", "emir6:fe", 
                          NULL, 0, NULL, 0) == NULL)
     {
-      printf("Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+      fprintf(stderr, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
       exit(1);
     }
 
@@ -71,15 +71,6 @@ close_mysql_connection(MYSQL *connection)
   mysql_close(connection);
 } // close_mysql_connection
   
-/* Determines whether given fingerprint can be safely inserted.
- * @return 1 if it is safe, 0 otherwise
- */
-int
-is_fingerprint_safe(char *fingerprint)
-{
-  return verify_fingerprint_format(fingerprint);
-} // is_fingerprint_safe
-
 /* Determines whether given url can be safely inserted.
  * @return 1 if it is safe, 0 otherwise.
  */ 
@@ -124,6 +115,7 @@ int is_in_cache (char *url, char *fingerprint)
   result = mysql_store_result(conn);
   num_rows = mysql_num_rows(result);
 
+  free(query_string);
   close_mysql_connection(conn);
   
   if (num_rows)
@@ -155,6 +147,7 @@ is_blacklisted (char *url)
   result = mysql_store_result(conn);
   num_elements = mysql_num_rows(result);
 
+  free(query_string);
   close_mysql_connection(conn);
    
   return num_elements;
@@ -190,6 +183,9 @@ int cache_insert (char* url, char* fingerprint, int db)
            db_name, url, fingerprint, timestamp);
 
   return_val = mysql_query(conn, query_string);
+
+  free(db_name);
+  free(query_string);
   close_mysql_connection(conn);
 
   return !return_val;
@@ -220,6 +216,9 @@ int cache_remove (char* fingerprint, int db)
   asprintf(&query_string, "DELETE FROM %s WHERE fingerprint=%s;",
            db_name, fingerprint);
   return_val = mysql_query(conn, query_string); 
+
+  free(db_name);
+  free(query_string);
   close_mysql_connection(conn);
 
   return !return_val;
