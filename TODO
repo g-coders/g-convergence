@@ -8,11 +8,15 @@ Next steps:
 
 notary.c:
 
-* walk through cache functions (still need to fix cache_update_url)
-* implement is_url_safe()
+* finish implementing execute_query()
+* include all fingerprints in fingerprintList within the response (not just
+   the first one)
 * test cache functions
-* Integrate cache functions into the system.
+* write a program to insert a url into blacklisted table and to remove a
+   url from blacklisted table
 * Test the case when the notary is running on a different machine
+* write a bash script to make notary a proper service (start,stop,restart...)
+* write a chache cleaner that remove expired certificates from trusted
 * Perform fuzz testing- test for receiving random data in requests
 
 The plan:
