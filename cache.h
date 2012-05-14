@@ -35,11 +35,14 @@ MYSQL* start_mysql_connection();
  */ 
 void close_mysql_connection(MYSQL *connection);
 
-/* Determines whether given url can be safely inserted.
- * Returns 1 if it is safe. Otherwise returns 0.
+/**
+ * Determines whether given url can be safely inserted.
+ * @param *conn, a connection struct
+ * @param stmt_str, a mysql query to execute
+ * @return 1 if it is safe, 0 otherwise.
  */ 
-int is_url_safe(char *url);
-
+int execute_query(MYSQL *conn, const char *stmt_str);
+  
 /* Checks if a particular fingerprint is in the cache already, 
  * either as the fingerprint of a trusted url or a blacklisted url. 
  * Returns 1 if the cache has a fingerprint for the url, 
@@ -60,16 +63,18 @@ int is_blacklisted (char *url);
  */ 
 int cache_insert (char* url, char* fingerprint, int db);
 
-/* Remove a specific certificate fingerprint from the cache. 
+/* Remove a specific url from the cache. 
  * Removes from trusted cache if db is set to true;
  * otherwise, removes from blacklist cache.
- * Returns 1 if removal is successful, 0 if fingerprint cannot be removed,
- * and -1 if the fingerprint does not exist in the database. 
+ * Returns 1 if removal is successful, 0 if url cannot be removed,
+ * and -1 if the url does not exist in the database. 
  */
-int cache_remove (char* fingerprint, int db);
+int cache_remove (char* url, int db);
 
-/* Removes cache entries that have expired from trusted cache.
- * @returns 1  if update is successful, otherwise 0
+/**
+ * Removes all entries from trusted on a cache miss and add the ones newly
+ * retrieved from the url
+ * @return 1 on success, 0 on failure
  */
 int cache_update_url (char *url, char **fingerprints, int num_of_certs);
 
