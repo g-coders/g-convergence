@@ -86,7 +86,7 @@ retrieve_response (void *coninfo_cls, host *host_to_verify, const char *fingerpr
   unsigned int *signature_size = NULL;
   unsigned char *signature;
   RSA *private_key;
-  FILE *key_file = fopen(key_filename, "r");
+  FILE *key_file = fopen(keyfile, "r");
 
   struct connection_info_struct *con_info = coninfo_cls;
 
@@ -175,14 +175,14 @@ retrieve_response (void *coninfo_cls, host *host_to_verify, const char *fingerpr
 \t]\n\
 }\n", start_time, end_time, fingerprint_to_send);
 
-   /* Get the RSA private key from a file. */
-  //private_key = PEM_read_RSAPrivateKey(key_file, NULL, NULL, NULL);
+  /* /\* Get the RSA private key from a file. *\/ */
+  /* private_key = PEM_read_RSAPrivateKey(key_file, NULL, NULL, NULL); */
 
-  /* Calculate the signature size and allocate space for it. */
-  //*signature_size = RSA_size(private_key);
-  //signature = (unsigned char *) malloc (*signature_size);
+  /* //Calculate the signature size and allocate space for it. */
+  /* signature_size = RSA_size(private_key); */
+  /* signature = (unsigned char *) malloc (*signature_size); */
 
-  //generate_signature((unsigned char *) json_fingerprint_list, signature, signature_size, private_key);
+  /* /\* generate_signature((unsigned char *) json_fingerprint_list, signature, signature_size, private_key); *\/ */
 
   set_answer_string(con_info, json_fingerprint_list);
   
