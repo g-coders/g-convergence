@@ -13,7 +13,10 @@ notary: notary.c ${OBJS}
 	${CC} -o $@ $^ ${CURLFLAG} ${MHDFLAG} ${SSLFLAG}
 
 test: notary-test.c ${OBJS}
-	${CC} -g -o $@ $^ ${CURLFLAG} ${MHDFLAG} ${SSLFLAG} ${CFLAGS} ${CACHEFLAGS}
+	${CC} -o $@ $^ ${CURLFLAG} ${MHDFLAG} ${SSLFLAG} ${CFLAGS} ${CACHEFLAGS}
+
+blacklist: blacklist.c cache.o
+	${CC} -o $@ $^ ${CACHEFLAGS}
 
 connection: connection.c response.c
 	${CC} -c $^
@@ -29,4 +32,4 @@ cache: cache.c
 
 clean:
 	/bin/rm -f ${OBJS} \#*# .#*
-	/bin/rm -f notary test
+	/bin/rm -f notary test blacklist

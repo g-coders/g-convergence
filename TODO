@@ -8,18 +8,19 @@ Next steps:
 
 notary.c:
 
-* finish implementing execute_query()
 * include all fingerprints in fingerprintList within the response (not just
    the first one)
+* compute timestamp in cache_insert
 * test cache functions
-* write a program to insert a url into blacklisted table and to remove a
-   url from blacklisted table
+* implement is_url_safe()
+* finish implementing execute_query()
 * Test the case when the notary is running on a different machine
-* write a bash script to make notary a proper service (start,stop,restart...)
 * put *.txt files in their own directory (requires changes in the code where 
   they are used)
+* test blacklist.c
+* write a bash script to make notary a proper service (start,stop,restart...)
 * write a chache cleaner that remove expired certificates from trusted
-* Perform fuzz testing- test for receiving random data in requests
+* Perform fuzz testing using input from files which exist in testing directory
 
 The plan:
 

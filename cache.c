@@ -72,6 +72,16 @@ close_mysql_connection(MYSQL *connection)
 } // close_mysql_connection
 
 /**
+ * Determines whether given url can be safely inserted.
+ * @return 1 if it is safe, 0 otherwise.
+ */
+int is_url_safe(char *url)
+{
+  /* STUB */
+  return 1;
+} // is_url_safe
+
+/**
  * Invoke error functions specific to prepared statements.
  * @param stmt, a statement handler
  * @param message, the error message
@@ -171,7 +181,11 @@ int cache_insert (char* url, char* fingerprint, int db)
   asprintf(&query_string, "INSERT INTO %s VALUES (%s, %s, %s)",
            db_name, url, fingerprint, timestamp);
 
-  return_val = mysql_query(conn, query_string);
+  /* Execute the query. */
+  if ((return_val = mysql_query(conn, query_string)))
+  {
+    printf("Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+  }
 
   free(db_name);
   free(query_string);
@@ -202,9 +216,14 @@ int cache_remove (char* url, int db)
       asprintf(&db_name, "blacklisted");
     }
 
-  asprintf(&query_string, "DELETE FROM %s WHERE url=%s;",
+  asprintf(&query_string, "DELETE FROM %s WHERE url=%s",
            db_name, url);
-  return_val = mysql_query(conn, query_string); 
+
+  /* Execute the query. */
+  if ((return_val = mysql_query(conn, query_string)))
+  {
+    printf("Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+  }
 
   free(db_name);
   free(query_string);
@@ -226,9 +245,17 @@ is_blacklisted (char *url)
   unsigned int num_elements;
 
   char *query_string = NULL;
-  asprintf (&query_string, "SELECT url FROM blacklisted WHERE url=%s;", url);
+  asprintf (&query_string, "SELECT url FROM blacklisted WHERE url=%s", url);
 
-  mysql_query(conn, query_string);
+  /* Execute the query. */
+  if (mysql_query(conn, query_string))
+  {
+    printf("Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+    free(query_string);
+    close_mysql_connection(conn);
+    return -1;
+  }
+  
   result = mysql_store_result(conn);
   num_elements = mysql_num_rows(result);
 
@@ -266,10 +293,18 @@ int is_in_cache (char *url, char *fingerprint)
     }
 
   asprintf (&query_string, 
-            "SELECT url FROM trusted WHERE fingerprint=%s;",
+            "SELECT url FROM trusted WHERE fingerprint=%s",
             fingerprint);
 
-  mysql_query(conn, query_string);
+  /* Execute the query. */
+  if (mysql_query(conn, query_string))
+  {
+    printf("Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+    free(query_string);
+    close_mysql_connection(conn);
+    return -1;
+  }
+  
   result = mysql_store_result(conn);
   num_rows = mysql_num_rows(result);
 

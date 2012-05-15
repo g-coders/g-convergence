@@ -37,6 +37,12 @@ void close_mysql_connection(MYSQL *connection);
 
 /**
  * Determines whether given url can be safely inserted.
+ * @return 1 if it is safe, 0 otherwise.
+ */
+int is_url_safe(char *url);
+
+/**
+ * Determines whether given url can be safely inserted.
  * @param *conn, a connection struct
  * @param stmt_str, a mysql query to execute
  * @return 1 if it is safe, 0 otherwise.
